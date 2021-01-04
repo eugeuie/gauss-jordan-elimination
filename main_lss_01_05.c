@@ -11,18 +11,16 @@ int param_d = 0, // print debug messages
 
 void exception(int code, const char *message) {
     /*
-     * 2 - ValidationError: Wrong syntax of parameters. There is no such parameter
-     * 3 - ValidationError: Wrong syntax of parameters. Too much filenames
-     * 4 - ValidationError: Wrong order of parameters
-     * 5 - ValidationError: There is no such file
-     * 6 - ValidationError: File is empty
-     * 7 - ValidationError: n is not a positive integer
-     * 8 - ValidationError: Not enough elements in the matrix
-     * 9 - ValidationError: One of the elements of the matrix is not a number or n is not a positive integer
+     * 2 - Error: Wrong syntax of parameters. There is no such parameter
+     * 3 - Error: Wrong syntax of parameters. Too much filenames
+     * 4 - Error: Wrong order of parameters
+     * 5 - Error: There is no such file
+     * 6 - Error: File is empty
+     * 7 - Error: n is not a positive integer
+     * 8 - Error: Not enough elements in the matrix
+     * 9 - Error: One of the elements of the matrix is not a number or n is not a positive integer
      */
-    if (param_e) {
-        printf("%s\n", message);
-    }
+    if (param_e) { printf("%s\n", message); }
     exit(code);
 }
 
@@ -40,9 +38,7 @@ void print_help() {
 void print_matrix(int n, double *A, double *B) {
     int i, j;
     for (i = 0; i < n; i++) {
-        for (j = 0; j < n; j++) {
-            printf("%1.9lf\t", A[i * n + j]);
-        }
+        for (j = 0; j < n; j++) { printf("%1.9lf\t", A[i * n + j]); }
         printf("\t\t%1.9lf\n", B[i]);
     }
     printf("\n");
@@ -51,13 +47,9 @@ void print_matrix(int n, double *A, double *B) {
 void output(const char *output_filename, int result, int n, const double *X) {
     int i;
     FILE *output_file = fopen(output_filename, "w");
-    if (result != 0) {
-        fprintf(output_file, "%d\n", 0);
-    } else {
+    if (result != 0) { fprintf(output_file, "%d\n", 0); } else {
         fprintf(output_file, "%d\n", n);
-        for (i = 0; i < n; i++) {
-            fprintf(output_file, "%1.9lf\n", *(X + i));
-        }
+        for (i = 0; i < n; i++) { fprintf(output_file, "%1.9lf\n", *(X + i)); }
     }
 }
 
@@ -67,9 +59,7 @@ int string_length(const char *string) {
     return length;
 }
 
-int file_exists(const char *filename) {
-    return fopen(filename, "r") != NULL;
-}
+int file_exists(const char *filename) { return fopen(filename, "r") != NULL; }
 
 void validate_params(int argc, char *argv[], char **input_filename, char **output_filename) {
     int i, filenames_count = 0, input_filename_set = 0;
@@ -99,45 +89,31 @@ void validate_params(int argc, char *argv[], char **input_filename, char **outpu
                         break;
                     }
                     default: {
-                        exception(2, "ValidationError: Wrong syntax of parameters. There is no such parameter");
+                        exception(2, "Error: Wrong syntax of parameters. There is no such parameter");
                     }
                 }
-            } else {
-                exception(2, "ValidationError: Wrong syntax of parameters. There is no such parameter");
-            }
-        } else {
-            filenames_count++;
-        }
+            } else { exception(2, "Error: Wrong syntax of parameters. There is no such parameter"); }
+        } else { filenames_count++; }
     }
 
-    if (filenames_count > 2) {
-        exception(3, "ValidationError: Wrong syntax of parameters. Too much filenames");
-    }
+    if (filenames_count > 2) { exception(3, "Error: Wrong syntax of parameters. Too much filenames"); }
 
     for (i = 1; i < argc; i++) {
         if (argv[i][0] != '-') {
             if (!input_filename_set) {
-                if (i != 1) {
-                    exception(4, "ValidationError: Wrong order of parameters");
-                }
+                if (i != 1) { exception(4, "Error: Wrong order of parameters"); }
                 *input_filename = argv[i];
-                if (!file_exists(*input_filename)) {
-                    exception(5, "ValidationError: There is no such file");
-                }
+                if (!file_exists(*input_filename)) { exception(5, "Error: There is no such file"); }
                 input_filename_set = 1;
             } else {
-                if (i != 2) {
-                    exception(4, "ValidationError: Wrong order of parameters");
-                }
+                if (i != 2) { exception(4, "Error: Wrong order of parameters");  }
                 *output_filename = argv[i];
             }
         }
     }
 
     if (!input_filename_set) {
-        if (!file_exists(*input_filename)) {
-            exception(5, "ValidationError: There is no such file");
-        }
+        if (!file_exists(*input_filename)) { exception(5, "Error: There is no such file"); }
     }
 }
 
@@ -146,34 +122,28 @@ void input(const char *input_filename, double **A, double **B, int *n) {
     FILE *input_file = fopen(input_filename, "r");
 
     check_input = fscanf(input_file, "%d", n);
-    if (check_input == EOF) {
-        exception(6, "ValidationError: File is empty");
-    }
+    if (check_input == EOF) { exception(6, "Error: File is empty"); }
 
-    if (check_input == 0 || *n <= 0) {
-        exception(7, "ValidationError: n is not a positive integer");
-    }
+    if (check_input == 0 || *n <= 0) { exception(7, "Error: n is not a positive integer"); }
 
     *A = malloc((*n) * (*n) * sizeof(double));
     *B = malloc((*n) * sizeof(double));
 
     for (i = 0; i < (*n) * (*n); i++) {
         check_input = fscanf(input_file, "%lf", (*A + i));
-        if (check_input == EOF) {
-            exception(8, "ValidationError: Not enough elements in the matrix");
-        }
+        if (check_input == EOF) { exception(8, "Error: Not enough elements in the matrix"); }
         if (check_input == 0) {
-            exception(9, "ValidationError: One of the elements of the matrix is not a number or n is not a positive integer");
+            exception(9,
+                      "Error: One of the elements of the matrix is not a number or n is not a positive integer");
         }
     }
 
     for (i = 0; i < (*n); i++) {
         check_input = fscanf(input_file, "%lf", (*B + i));
-        if (check_input == EOF) {
-            exception(8, "ValidationError: Not enough elements in the matrix");
-        }
+        if (check_input == EOF) { exception(8, "Error: Not enough elements in the matrix"); }
         if (check_input == 0) {
-            exception(9, "ValidationError: One of the elements of the matrix is not a number or n is not a positive integer");
+            exception(9,
+                      "Error: One of the elements of the matrix is not a number or n is not a positive integer");
         }
     }
 }
@@ -196,23 +166,33 @@ int main(int argc, char *argv[]) {
     tmp = malloc(lss_memsize_01_05(n));
     X = malloc(n * sizeof(double));
 
-    if (param_p) {
-        print_matrix(n, A, B);
-    }
+    if (param_p) { print_matrix(n, A, B); }
 
     clock_t begin = clock();
     result = lss_01_05(n, A, B, X, tmp);
     clock_t end = clock();
 
-    if (param_p) {
-        print_matrix(n, A, B);
+    if (param_p) { print_matrix(n, A, B); }
+
+    if (param_d) {
+        switch (result) {
+            case -1:
+                printf("Success: The solution method is not applicable to this system\n");
+                break;
+            case 0:
+                printf("Success: Solution built\n");
+                break;
+            case 1:
+                printf("Success: Solution for this system does not exist\n");
+                break;
+            default:
+                break;
+        }
     }
 
     double execution_time = (double) (end - begin) / CLOCKS_PER_SEC;
 
-    if (param_t) {
-        printf("Execution time: %1.9lf\n", execution_time);
-    }
+    if (param_t) { printf("Execution time: %1.9lf\n", execution_time); }
 
     output(output_filename, result, n, X);
 
