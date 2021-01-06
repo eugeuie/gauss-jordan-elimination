@@ -38,11 +38,11 @@ void print_help() {
            "Default input_file_name value is lss_01_05_in.txt, default output_file_name value is lss_01_05_out.txt\n");
 }
 
-void print_matrix(int n, double *A, double *B) {
+void print_matrix(int n, double *A, double *B, const double *tmp) {
     int i, j;
     for (i = 0; i < n; i++) {
-        for (j = 0; j < n; j++) { printf("%1.9lf\t", get(A, n, i, j)); }
-        printf("\t\t%1.9lf\n", B[i]);
+        for (j = 0; j < n; j++) { printf("%1.9lf\t", get_a(A, n, tmp, i, j)); }
+        printf("\t\t%1.9lf\n", get_b(B, tmp, i));
     }
     printf("\n");
 }
@@ -152,7 +152,7 @@ void input(const char *input_filename, double **A, double **B, int *n) {
 }
 
 int main(int argc, char *argv[]) {
-    int n = 0, result;
+    int n = 0, result, i;
     double *A, *B, *X, *tmp;
     char *input_filename = DEFAULT_INPUT_FILENAME,
          *output_filename = DEFAULT_OUTPUT_FILENAME;
@@ -167,20 +167,21 @@ int main(int argc, char *argv[]) {
     input(input_filename, &A, &B, &n);
 
     tmp = malloc(lss_memsize_01_05(n));
+    for (i = 0; i < n; i++) { tmp[i] = i; }
     X = malloc(n * sizeof(double));
 
-    if (param_p) { print_matrix(n, A, B); }
+    if (param_p) { print_matrix(n, A, B, tmp); }
 
     clock_t begin = clock();
     result = lss_01_05(n, A, B, X, tmp);
     clock_t end = clock();
 
-    if (param_p) { print_matrix(n, A, B); }
+    if (param_p) { print_matrix(n, A, B, tmp); }
 
     if (param_d) {
         switch (result) {
             case -1:
-                printf("Success: The solution method is not applicable to this system\n"); //TODO Is it Success?
+                printf("Error: The solution method is not applicable to this system\n");
                 break;
             case 0:
                 printf("Success: Solution built\n");
