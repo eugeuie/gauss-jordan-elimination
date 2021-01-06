@@ -50,7 +50,8 @@ void print_matrix(int n, double *A, double *B, const double *tmp) {
 void output(const char *output_filename, int result, int n, const double *X) {
     int i;
     FILE *output_file = fopen(output_filename, "w");
-    if (result != 0) { fprintf(output_file, "%d\n", 0); } else {
+    if (result != 0) { fprintf(output_file, "%d\n", 0); }
+    else {
         fprintf(output_file, "%d\n", n);
         for (i = 0; i < n; i++) { fprintf(output_file, "%1.9lf\n", X[i]); }
     }
@@ -87,7 +88,8 @@ void validate_params(int argc, char *argv[], char **input_filename, char **outpu
                         param_t = 1;
                         break;
                     }
-                    case 'h': case '?': {
+                    case 'h':
+                    case '?': {
                         param_h = 1;
                         break;
                     }
@@ -109,7 +111,7 @@ void validate_params(int argc, char *argv[], char **input_filename, char **outpu
                 if (!file_exists(*input_filename)) { exception(5, "Error: There is no such file"); }
                 input_filename_set = 1;
             } else {
-                if (i != 2) { exception(4, "Error: Wrong order of parameters");  }
+                if (i != 2) { exception(4, "Error: Wrong order of parameters"); }
                 *output_filename = argv[i];
             }
         }

@@ -8,20 +8,6 @@ extern int param_d, param_e;
 
 size_t lss_memsize_01_05(int n) { return n * sizeof(double); }
 
-int row_index_of_column_max_element(int n, double *A, const double *tmp, int k) {
-    int i, row_index = -1;
-    double max = 0;
-
-    for (i = k; i < n; i++) {
-        if (not_zero(fabs(get_a(A, n, tmp, i, k)) - fabs(max))) {
-            max = fabs(get_a(A, n, tmp, i, k));
-            row_index = i;
-        }
-    }
-
-    return row_index;
-}
-
 int zero_coefficients_row(int n, double *A, const double *tmp, int k) {
     int j, zero_coefficients_row = 1;
 
@@ -35,6 +21,20 @@ int zero_coefficients_row(int n, double *A, const double *tmp, int k) {
     return zero_coefficients_row;
 }
 
+int pivot_row_index(int n, double *A, const double *tmp, int k) {
+    int i, row_index = -1;
+    double max = 0;
+
+    for (i = k; i < n; i++) {
+        if (not_zero(fabs(get_a(A, n, tmp, i, k)) - fabs(max))) {
+            max = fabs(get_a(A, n, tmp, i, k));
+            row_index = i;
+        }
+    }
+
+    return row_index;
+}
+
 void rows_indices_swap(double *row_indices, int first_row_index, int second_row_index) {
     double tmp = row_indices[first_row_index];
     row_indices[first_row_index] = row_indices[second_row_index];
@@ -42,23 +42,23 @@ void rows_indices_swap(double *row_indices, int first_row_index, int second_row_
 }
 
 int lss_01_05(int n, double *A, double *B, double *X, double *tmp) {
-    int i, j, k, row_index;
+    int i, j, k, pivot_row;
 
     for (k = 0; k < n; k++) {
-        row_index = row_index_of_column_max_element(n, A, tmp, k);
-
         if (zero_coefficients_row(n, A, tmp, k) && not_zero(get_b(B, tmp, k))) { return 1; }
 
-        if (row_index == -1) {
+        pivot_row = pivot_row_index(n, A, tmp, k);
+
+        if (pivot_row == -1) {
             X[k] = 0;
             continue;
         }
 
-        if (k != row_index) {
-            rows_indices_swap(tmp, k, row_index);
+        if (k != pivot_row) {
+            rows_indices_swap(tmp, k, pivot_row);
 
             if (param_d) {
-                printf("Row %d is swapped with row %d\n\n", k, row_index);
+                printf("Row %d is swapped with row %d\n\n", k, pivot_row);
                 print_matrix(n, A, B, tmp);
             }
         }
