@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define get(A, n, i, j) A[(i) * (n) + (j)]
+
 size_t lss_memsize_01_05(int n);
 
 void print_matrix(int n, double *A, double *B);

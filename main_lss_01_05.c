@@ -1,7 +1,10 @@
-// 5. Метод Гаусса-Жордана с выбором главного элемента по столбцу
+// 5. Gauss-Jordan Elimination with pivot selection by column
 
 #include "lss_01_05.h"
 #include <time.h>
+
+#define DEFAULT_INPUT_FILENAME "lss_01_05_in.txt"
+#define DEFAULT_OUTPUT_FILENAME "lss_01_05_out.txt"
 
 int param_d = 0, // print debug messages
     param_e = 0, // print errors
@@ -38,7 +41,7 @@ void print_help() {
 void print_matrix(int n, double *A, double *B) {
     int i, j;
     for (i = 0; i < n; i++) {
-        for (j = 0; j < n; j++) { printf("%1.9lf\t", A[i * n + j]); }
+        for (j = 0; j < n; j++) { printf("%1.9lf\t", get(A, n, i, j)); }
         printf("\t\t%1.9lf\n", B[i]);
     }
     printf("\n");
@@ -49,7 +52,7 @@ void output(const char *output_filename, int result, int n, const double *X) {
     FILE *output_file = fopen(output_filename, "w");
     if (result != 0) { fprintf(output_file, "%d\n", 0); } else {
         fprintf(output_file, "%d\n", n);
-        for (i = 0; i < n; i++) { fprintf(output_file, "%1.9lf\n", *(X + i)); }
+        for (i = 0; i < n; i++) { fprintf(output_file, "%1.9lf\n", X[i]); }
     }
 }
 
@@ -130,7 +133,7 @@ void input(const char *input_filename, double **A, double **B, int *n) {
     *B = malloc((*n) * sizeof(double));
 
     for (i = 0; i < (*n) * (*n); i++) {
-        check_input = fscanf(input_file, "%lf", (*A + i));
+        check_input = fscanf(input_file, "%lf", &(*A)[i]);
         if (check_input == EOF) { exception(8, "Error: Not enough elements in the matrix"); }
         if (check_input == 0) {
             exception(9,
@@ -139,7 +142,7 @@ void input(const char *input_filename, double **A, double **B, int *n) {
     }
 
     for (i = 0; i < (*n); i++) {
-        check_input = fscanf(input_file, "%lf", (*B + i));
+        check_input = fscanf(input_file, "%lf", &(*B)[i]);
         if (check_input == EOF) { exception(8, "Error: Not enough elements in the matrix"); }
         if (check_input == 0) {
             exception(9,
@@ -151,8 +154,8 @@ void input(const char *input_filename, double **A, double **B, int *n) {
 int main(int argc, char *argv[]) {
     int n = 0, result;
     double *A, *B, *X, *tmp;
-    char *input_filename = "lss_01_05_in.txt",
-         *output_filename = "lss_01_05_out.txt";
+    char *input_filename = DEFAULT_INPUT_FILENAME,
+         *output_filename = DEFAULT_OUTPUT_FILENAME;
 
     validate_params(argc, argv, &input_filename, &output_filename);
 
@@ -177,7 +180,7 @@ int main(int argc, char *argv[]) {
     if (param_d) {
         switch (result) {
             case -1:
-                printf("Success: The solution method is not applicable to this system\n");
+                printf("Success: The solution method is not applicable to this system\n"); //TODO Is it Success?
                 break;
             case 0:
                 printf("Success: Solution built\n");
