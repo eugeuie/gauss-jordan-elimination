@@ -27,43 +27,18 @@ void exception(int code, const char *message) {
     exit(code);
 }
 
-void print_help() {
-    printf("Usage: lss [input_file_name] [output_file_name] [options]\n"
-           "Where options include:\n"
-           "   -d        print debug messages [default OFF]\n"
-           "   -e        print errors [default OFF]\n"
-           "   -p        print matrix [default OFF]\n"
-           "   -t        print execution time [default OFF]\n"
-           "   -h, -?    print this and exit\n"
-           "Default input_file_name value is lss_01_05_in.txt, default output_file_name value is lss_01_05_out.txt\n");
-}
-
-void print_matrix(int n, double *A, double *B, const double *tmp) {
-    int i, j;
-    for (i = 0; i < n; i++) {
-        for (j = 0; j < n; j++) { printf("%1.9lf\t", get_a(A, n, tmp, i, j)); }
-        printf("\t\t%1.9lf\n", get_b(B, tmp, i));
-    }
-    printf("\n");
-}
-
-void output(const char *output_filename, int result, int n, const double *X) {
-    int i;
-    FILE *output_file = fopen(output_filename, "w");
-    if (result != 0) { fprintf(output_file, "%d\n", 0); }
-    else {
-        fprintf(output_file, "%d\n", n);
-        for (i = 0; i < n; i++) { fprintf(output_file, "%1.9lf\n", X[i]); }
-    }
-}
-
 int string_length(const char *string) {
     int length;
     for (length = 0; string[length] != '\0'; length++);
     return length;
 }
 
-int file_exists(const char *filename) { return fopen(filename, "r") != NULL; }
+int file_exists(const char *filename) {
+    FILE *file = fopen(filename, "r");
+    int ptr = file != NULL;
+    fclose(file);
+    return ptr;
+}
 
 void validate_params(int argc, char *argv[], char **input_filename, char **output_filename) {
     int i, filenames_count = 0, input_filename_set = 0;
@@ -151,6 +126,41 @@ void input(const char *input_filename, double **A, double **B, int *n) {
                       "Error: One of the elements of the matrix is not a number or n is not a positive integer");
         }
     }
+
+    fclose(input_file);
+}
+
+void print_help() {
+    printf("Usage: lss [input_file_name] [output_file_name] [options]\n"
+           "Where options include:\n"
+           "   -d        print debug messages [default OFF]\n"
+           "   -e        print errors [default OFF]\n"
+           "   -p        print matrix [default OFF]\n"
+           "   -t        print execution time [default OFF]\n"
+           "   -h, -?    print this and exit\n"
+           "Default input_file_name value is lss_01_05_in.txt, default output_file_name value is lss_01_05_out.txt\n");
+}
+
+void print_matrix(int n, double *A, double *B) {
+    int i, j;
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) { printf("%1.9lf\t", A[n * i + j]); }
+        printf("\t%1.9lf\n", B[i]);
+    }
+    printf("\n");
+}
+
+void output(const char *output_filename, int result, int n, const double *X) {
+    int i;
+    FILE *output_file = fopen(output_filename, "w");
+
+    if (result != 0) { fprintf(output_file, "%d\n", 0); }
+    else {
+        fprintf(output_file, "%d\n", n);
+        for (i = 0; i < n; i++) { fprintf(output_file, "%1.9lf\n", X[i]); }
+    }
+
+    fclose(output_file);
 }
 
 int main(int argc, char *argv[]) {
@@ -172,13 +182,13 @@ int main(int argc, char *argv[]) {
     for (i = 0; i < n; i++) { tmp[i] = i; }
     X = malloc(n * sizeof(double));
 
-    if (param_p) { print_matrix(n, A, B, tmp); }
+    if (param_p) { print_matrix(n, A, B); }
 
     clock_t begin = clock();
     result = lss_01_05(n, A, B, X, tmp);
     clock_t end = clock();
 
-    if (param_p) { print_matrix(n, A, B, tmp); }
+    if (param_p) { print_matrix(n, A, B); }
 
     if (param_d) {
         switch (result) {

@@ -1,85 +1,99 @@
 #include "lss_01_05.h"
 #include <math.h>
 
-#define EPS 1e-20
-#define not_zero(number) fabs(number) > EPS
+#define EPS 1e-12
 
 extern int param_d, param_e;
 
-size_t lss_memsize_01_05(int n) { return n * sizeof(double); }
-
-int zero_coefficients_row(int n, double *A, const double *tmp, int k) {
-    int j, zero_coefficients_row = 1;
-
-    for (j = 0; j < n; j++) {
-        if (not_zero(get_a(A, n, tmp, k, j))) {
-            zero_coefficients_row = 0;
-            break;
-        }
-    }
-
-    return zero_coefficients_row;
-}
-
-int pivot_row_index(int n, double *A, const double *tmp, int k) {
-    int i, row_index = -1;
-    double max = 0;
-
-    for (i = k; i < n; i++) {
-        if (not_zero(fabs(get_a(A, n, tmp, i, k)) - fabs(max))) {
-            max = fabs(get_a(A, n, tmp, i, k));
-            row_index = i;
-        }
-    }
-
-    return row_index;
-}
-
-void rows_indices_swap(double *row_indices, int first_row_index, int second_row_index) {
-    double tmp = row_indices[first_row_index];
-    row_indices[first_row_index] = row_indices[second_row_index];
-    row_indices[second_row_index] = tmp;
+size_t lss_memsize_01_05(int n) {
+    return n * sizeof(double);
 }
 
 int lss_01_05(int n, double *A, double *B, double *X, double *tmp) {
-    int i, j, k, pivot_row;
+    int row, col, pivot, i, j;
+    double t, *where = tmp;
 
-    for (k = 0; k < n; k++) {
-        if (zero_coefficients_row(n, A, tmp, k) && not_zero(get_b(B, tmp, k))) { return 1; }
+    for (col = 0; col < n; ++col) {
+        where[col] = -1;
+    }
 
-        pivot_row = pivot_row_index(n, A, tmp, k);
-
-        if (pivot_row == -1) {
-            X[k] = 0;
+    for (row = 0, col = 0; row < n && col < n; ++col) {
+        // Поиск главного элемента по столбцу
+        pivot = row;
+        for (i = row; i < n; ++i) {
+            if (fabs(A[n * i + col]) > fabs(A[n * pivot + col])) {
+                pivot = i;
+            }
+        }
+        if (fabs(A[n * pivot + col]) < EPS) {
             continue;
         }
 
-        if (k != pivot_row) {
-            rows_indices_swap(tmp, k, pivot_row);
+        // Перестановка строки, содержащей главный элемент по столбцу на место текущей строки
+        if (pivot != row) {
+            for (j = 0; j < n; ++j) {
+                t = A[n * pivot + j];
+                A[n * pivot + j] = A[n * row + j];
+                A[n * row + j] = t;
+            }
+            t = B[pivot];
+            B[pivot] = B[row];
+            B[row] = t;
 
             if (param_d) {
-                printf("Row %d is swapped with row %d\n\n", k, pivot_row);
-                print_matrix(n, A, B, tmp);
+                printf("Row %d is swapped with row %d:\n\n", row, pivot);
+                print_matrix(n, A, B);
             }
         }
 
-        get_a(B, 1, tmp, k, 0) = get_b(B, tmp, k) / get_a(A, n, tmp, k, k);
-        for (j = n - 1; j >= k; j--) { get_a(A, n, tmp, k, j) = get_a(A, n, tmp, k, j) / get_a(A, n, tmp, k, k); }
-        for (i = 0; i < n; i++) {
-            if (i == k) { continue; }
-            get_a(B, 1, tmp, i, 0) = get_b(B, tmp, i) - get_a(A, n, tmp, i, k) * get_b(B, tmp, k);
+        // Записываем, в какой строке должна получиться переменная текущего столбца
+        where[col] = row;
+
+        // Делим строку на главный элемент
+        t = A[n * row + col];
+        for (j = col; j < n; ++j) {
+            A[n * row + j] = A[n * row + j] / t;
         }
-        for (j = n - 1; j >= k; j--) {
-            for (i = 0; i < n; i++) {
-                if (i == k) { continue; }
-                get_a(A, n, tmp, i, j) = get_a(A, n, tmp, i, j) - get_a(A, n, tmp, i, k) * get_a(A, n, tmp, k, j);
+        B[row] = B[row] / t;
+
+        // Прибавляем текущую строку к остальным строкам с таким коэффициентом, чтобы их коэффициенты в текущем столбце обращались в нули
+        for (i = 0; i < n; ++i) {
+            if (i != row) {
+                t = A[n * i + col];
+                for (j = col; j < n; ++j) {
+                    A[n * i + j] = A[n * i + j] - t * A[n * row + j];
+                }
+                B[i] = B[i] - t * B[row];
             }
         }
 
-        if (param_d) { print_matrix(n, A, B, tmp); }
+        ++row;
+
+        if (param_d) {
+            printf("Column %d is nullified:\n\n", col);
+            print_matrix(n, A, B);
+        }
     }
 
-    for (i = 0; i < n; i++) { X[i] = get_b(B, tmp, i); }
+    // Присваиваем столбец B столбцу X
+    for (col = 0; col < n; ++col) {
+        if (fabs(where[col] - (-1)) > EPS) {
+            X[col] = B[(int) where[col]];
+        } else {
+            X[col] = 0;
+        }
+    }
+
+    // Подстановка полученного решения в систему
+    for (row = 0; row < n; ++row) {
+        t = 0;
+        for (col = 0; col < n; ++col) {
+            t = t + X[col] * A[n * row + col];
+        }
+        if (fabs(t - B[row]) > EPS) {
+            return 1;
+        }
+    }
 
     return 0;
 }
