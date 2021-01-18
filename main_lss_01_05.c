@@ -28,8 +28,7 @@ void exception(int code, const char *message) {
 
 int string_length(const char *string) {
     int length;
-    for (length = 0; string[length] != '\0'; length++)
-        ;
+    for (length = 0; string[length] != '\0'; length++);
     return length;
 }
 
@@ -210,9 +209,6 @@ int main(int argc, char *argv[]) {
     input(input_filename, &A, &B, &n);
 
     tmp = malloc(lss_memsize_01_05(n));
-    for (i = 0; i < n; i++) {
-        tmp[i] = i;
-    }
     X = malloc(n * sizeof(double));
 
     if (param_p) {

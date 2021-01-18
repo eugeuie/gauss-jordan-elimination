@@ -24,7 +24,7 @@ int lss_01_05(int n, double *A, double *B, double *X, double *tmp) {
                 pivot = i;
             }
         }
-        if (fabs(A[n * pivot + col]) < EPS) {
+        if (fabs(A[n * pivot + col]) <= EPS) {
             continue;
         }
 
