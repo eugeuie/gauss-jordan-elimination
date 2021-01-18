@@ -7,7 +7,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/main.exe",
             "args": [
-                "tests/test_8.txt",
+                "tests/test_16.txt",
                 "tests/output.txt",
                 "-d",
                 "-e",
