@@ -10,4 +10,4 @@ void print_matrix(int n, double *A, double *B);
 
 int lss_01_05(int n, double *A, double *B, double *X, double *tmp);
 
-#endif //GAUSS_JORDAN_ELIMINATION_LSS_01_05_H
+#endif  // GAUSS_JORDAN_ELIMINATION_LSS_01_05_H

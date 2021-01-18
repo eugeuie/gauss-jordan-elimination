@@ -1,0 +1,27 @@
+{
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "C/C++: gcc build project",
+            "command": "gcc",
+            "args": [
+                "-g",
+                "main_lss_01_05.c",
+                "lss_01_05.c",
+                "-o",
+                "main"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ],
+    "version": "2.0.0"
+}

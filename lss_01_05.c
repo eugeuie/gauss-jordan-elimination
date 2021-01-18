@@ -1,13 +1,12 @@
 #include "lss_01_05.h"
+
 #include <math.h>
 
-#define EPS 1e-12
+#define EPS 1e-8
 
 extern int param_d, param_e;
 
-size_t lss_memsize_01_05(int n) {
-    return n * sizeof(double);
-}
+size_t lss_memsize_01_05(int n) { return n * sizeof(double); }
 
 int lss_01_05(int n, double *A, double *B, double *X, double *tmp) {
     int row, col, pivot, i, j;
@@ -56,7 +55,8 @@ int lss_01_05(int n, double *A, double *B, double *X, double *tmp) {
         }
         B[row] = B[row] / t;
 
-        // Прибавляем текущую строку к остальным строкам с таким коэффициентом, чтобы их коэффициенты в текущем столбце обращались в нули
+        // Прибавляем текущую строку к остальным строкам с таким коэффициентом, чтобы их
+        // коэффициенты в текущем столбце обращались в нули
         for (i = 0; i < n; ++i) {
             if (i != row) {
                 t = A[n * i + col];
@@ -78,7 +78,7 @@ int lss_01_05(int n, double *A, double *B, double *X, double *tmp) {
     // Присваиваем столбец B столбцу X
     for (col = 0; col < n; ++col) {
         if (fabs(where[col] - (-1)) > EPS) {
-            X[col] = B[(int) where[col]];
+            X[col] = B[(int)where[col]];
         } else {
             X[col] = 0;
         }
